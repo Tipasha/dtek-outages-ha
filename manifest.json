@@ -1,0 +1,10 @@
+{
+    "domain": "dtek_outages",
+    "name": "DTEK Outages",
+    "version": "1.0",
+    "requirements": ["telethon==1.33.0", "requests"],
+    "dependencies": [],
+    "codeowners": ["@Tipasha"],
+    "config_flow": true,
+    "platforms": ["sensor"]
+}

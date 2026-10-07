@@ -1,0 +1,4 @@
+reload:
+  name: Reload integration
+  description: Reload the dtek_outages integration and all its entities.
+  fields: {}
