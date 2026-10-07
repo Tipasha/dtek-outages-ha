@@ -17,8 +17,8 @@ attributes.
 
 - A Telegram account with access to the target channel or group.
 - Telegram API ID and API hash from [my.telegram.org](https://my.telegram.org).
-- Access to the account's Telegram login code and, if enabled, its two-step
-  verification password.
+- Another device where that account is signed in to Telegram, to scan the login
+  QR code, and its two-step verification password if enabled.
 
 The integration's Python dependencies are installed by Home Assistant from
 `manifest.json`.
@@ -43,9 +43,11 @@ The integration's Python dependencies are installed by Home Assistant from
 3. Go to **Settings → Devices & Services → Add Integration**.
 4. Search for **DTEK Outages** and follow the setup flow.
 
-Enter your Telegram phone number, API ID, API hash, and optional comma-separated
-channel usernames or numeric IDs. Complete the Telegram login code and two-step
-verification prompts, if shown.
+Enter your Telegram API ID, API hash, and optional comma-separated channel
+usernames or numeric IDs. Then, in Telegram on another signed-in device, open
+**Settings → Devices → Link Desktop Device**, scan the QR code shown by Home
+Assistant within 30 seconds, and select **Submit**. Enter the two-step
+verification password if prompted.
 
 If no channels are entered, the integration uses the default channel list in
 `const.py`.
@@ -54,9 +56,9 @@ If no channels are entered, the integration uses the default channel list in
 
 If the saved Telegram session becomes unauthorized, Home Assistant starts a
 reauthentication flow for the existing DTEK Outages entry. Review or replace the
-saved Telegram credentials, then complete the login code and two-step
-verification prompts. The existing integration entry and schedule data are
-preserved.
+saved Telegram credentials, then scan a new QR code and enter the two-step
+verification password if prompted. The existing integration entry and schedule
+data are preserved.
 
 ## Sensor
 

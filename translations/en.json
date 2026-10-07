@@ -1,0 +1,51 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "DTEK Outages",
+        "description": "Connect your Telegram account to receive DTEK outage updates. You will log in by scanning a QR code with Telegram on another device.",
+        "data": {
+          "api_id": "Telegram API ID",
+          "api_hash": "Telegram API hash",
+          "channel": "Channels (optional)"
+        },
+        "data_description": {
+          "api_id": "Application API ID from my.telegram.org.",
+          "api_hash": "Application API hash from my.telegram.org.",
+          "channel": "Comma-separated Telegram usernames or numeric channel IDs."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Reconnect Telegram",
+        "description": "Review your Telegram credentials, then scan a new QR code to sign in again.",
+        "data": {
+          "api_id": "Telegram API ID",
+          "api_hash": "Telegram API hash",
+          "channel": "Channels (optional)"
+        }
+      },
+      "qr": {
+        "title": "Scan the QR code with Telegram",
+        "description": "On a device where Telegram is signed in, open **Settings → Devices → Link Desktop Device** and scan the code below within 30 seconds, then select **Submit**."
+      },
+      "2fa": {
+        "title": "Telegram two-step verification",
+        "description": "Enter the password configured for Telegram two-step verification.",
+        "data": {
+          "password": "Two-step verification password"
+        }
+      }
+    },
+    "error": {
+      "invalid_api": "Telegram rejected the API ID or API hash.",
+      "qr_not_scanned": "The QR code has not been scanned yet. Scan it, then select Submit.",
+      "qr_expired": "The QR code expired. Scan the new code, then select Submit.",
+      "invalid_password": "This two-step verification password is incorrect."
+    },
+    "abort": {
+      "reauth_entry_missing": "The existing DTEK Outages entry could not be found.",
+      "qr_login_failed": "Telegram QR login failed. Check the Home Assistant log, then try again.",
+      "2fa_failed": "Telegram two-step verification failed. Start authentication again."
+    }
+  }
+}
