@@ -25,13 +25,27 @@ The integration's Python dependencies are installed by Home Assistant from
 
 ## Installation
 
-1. Copy the `dtek_outages` directory into `/config/custom_components/`.
+### HACS (recommended)
+
+1. Open HACS in Home Assistant.
+2. Click the three dots in the top right corner and select **Custom repositories**.
+3. Add `https://github.com/Tipasha/dtek-outages-ha` with category **Integration**.
+4. Click **Download** on the integration card.
+5. Restart Home Assistant.
+6. Go to **Settings → Devices & Services → Add Integration**.
+7. Search for **DTEK Outages** and follow the setup flow.
+
+### Manual
+
+1. Copy the `dtek_outages` folder to `/config/custom_components/` on your Home
+  Assistant instance.
 2. Restart Home Assistant.
-3. Open **Settings → Devices & services → Add integration** and select
-   **DTEK Outages**.
-4. Enter the Telegram phone number, API ID, API hash, and optional comma-separated
-   channel usernames or numeric IDs.
-5. Complete Telegram's login code and two-step verification prompts, if shown.
+3. Go to **Settings → Devices & Services → Add Integration**.
+4. Search for **DTEK Outages** and follow the setup flow.
+
+Enter your Telegram phone number, API ID, API hash, and optional comma-separated
+channel usernames or numeric IDs. Complete the Telegram login code and two-step
+verification prompts, if shown.
 
 If no channels are entered, the integration uses the default channel list in
 `const.py`.
