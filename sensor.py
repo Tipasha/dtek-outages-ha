@@ -11,9 +11,16 @@ from telethon import TelegramClient, events
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.storage import STORAGE_DIR
+from homeassistant.util import dt as dt_util
 
-from .const import DEFAULT_CHANNELS, SAVE_DIR_NAME
+from .const import (
+    DEFAULT_CHANNELS,
+    SAVE_DIR_NAME,
+    SCHEDULE_RETENTION_DAYS,
+    SIGNAL_SCHEDULE_UPDATED,
+)
 from .helper import async_read_json, async_write_json
 from .schedule_parser import parse_schedule_from_image, parse_schedule_from_text
 
@@ -53,7 +60,7 @@ class DtekOutagesSensor(SensorEntity):
 
     async def async_added_to_hass(self):
         """Called when entity is added to HA; restore saved schedules."""
-        today_dt = datetime.now()
+        today_dt = dt_util.now()
         today = today_dt.strftime("%Y-%m-%d")
         tomorrow = (today_dt + timedelta(days=1)).strftime("%Y-%m-%d")
 
@@ -88,7 +95,7 @@ class DtekOutagesSensor(SensorEntity):
                         file_date = file[len("dtek_schedule_") : -len(".json")]
                         if (
                             datetime.now() - datetime.strptime(file_date, "%Y-%m-%d")
-                        ).days > 30:
+                        ).days > SCHEDULE_RETENTION_DAYS:
                             os.remove(os.path.join(self._storage_dir, file))
 
             await self.hass.async_add_executor_job(cleanup_old_files)
@@ -213,12 +220,13 @@ class DtekOutagesSensor(SensorEntity):
             _LOGGER.exception("Failed to process new message: %s", err)
 
     async def _update_current_and_tomorrow(self):
-        today_dt = datetime.now()
+        today_dt = dt_util.now()
         today = today_dt.strftime("%Y-%m-%d")
         tomorrow = (today_dt + timedelta(days=1)).strftime("%Y-%m-%d")
 
         self._schedule_today = await self._load_schedule(today)
         self._schedule_tomorrow = await self._load_schedule(tomorrow)
+        async_dispatcher_send(self.hass, SIGNAL_SCHEDULE_UPDATED)
 
 
 async def async_setup_entry(

@@ -10,6 +10,8 @@ attributes.
 - Parses text schedule updates marked with `ОНОВЛЕННЯ ГРАФІКА`.
 - Persists parsed schedules in Home Assistant's `.storage` directory.
 - Exposes `schedule_today` and `schedule_tomorrow` on `sensor.dtek_outages`.
+- Exposes parsed outage intervals as events on the read-only
+  `calendar.dtek_outages` calendar.
 - Starts a reauthentication flow on the existing config entry if the Telegram
   session is no longer authorized.
 
@@ -73,6 +75,17 @@ updates and briefly changes to `new` while a schedule message is processed.
 
 Each schedule contains a `day` date string and an `hours` list of outage
 intervals, for example `00:00-02:00`.
+
+## Calendar
+
+The integration provides a read-only `calendar.dtek_outages` entity. Each
+parsed interval for the configured outage queue is shown as a separate event
+in Home Assistant's calendar views. Schedules are read from the persisted DTEK
+data, and the calendar refreshes when a new schedule is saved and periodically
+to update its next-event state. It does not create events in another calendar
+or support editing outage events.
+
+Parsed schedule files are retained for 90 days (approximately three months).
 
 ## Credentials and session data
 

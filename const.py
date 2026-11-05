@@ -1,4 +1,6 @@
 DOMAIN = "dtek_outages"
+SIGNAL_SCHEDULE_UPDATED = f"{DOMAIN}_schedule_updated"
+SCHEDULE_RETENTION_DAYS = 90
 # Could be one or list of channels separated by coma
 # Channels recommended to use: @dtek_ua, @dtek_ocr_test, -1002136796167 (NO Medova)
 DEFAULT_CHANNELS = "@dtek_ocr_test,-1002136796167"

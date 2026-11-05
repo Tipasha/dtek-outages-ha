@@ -4,7 +4,7 @@ from homeassistant.exceptions import HomeAssistantError
 
 from .const import DOMAIN
 
-PLATFORMS = ["sensor"]
+PLATFORMS = ["sensor", "calendar"]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
