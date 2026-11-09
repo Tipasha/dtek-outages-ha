@@ -190,7 +190,7 @@ class DtekOutagesSensor(SensorEntity):
 
     async def _handle_new_message_v2(self, event):
         text = getattr(event.message, "message", "") or ""
-        if "ОНОВЛЕННЯ ГРАФІКА" not in text:
+        if "оновлення графіка" not in text.casefold():
             return
 
         _LOGGER.info(

@@ -76,6 +76,11 @@ updates and briefly changes to `new` while a schedule message is processed.
 Each schedule contains a `day` date string and an `hours` list of outage
 intervals, for example `00:00-02:00`.
 
+Text updates support numeric dates with `.` or `/`, Ukrainian month-name dates,
+and common time-range separators. Outage intervals are identified from their
+recognized status marker or outage wording. Unrecognized ranges are omitted;
+the parser does not infer outages from totals or use the legacy text parser.
+
 ## Calendar
 
 The integration provides a read-only `calendar.dtek_outages` entity. Each

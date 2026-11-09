@@ -14,6 +14,32 @@ from .helper import async_read_image_base64, async_read_json
 
 _LOGGER = logging.getLogger(__name__)
 
+_MONTH_PATTERN = "|".join(re.escape(month) for month in UA_MONTHS)
+_DATE_PATTERN = re.compile(
+    rf"\b(?:"
+    rf"(?P<day>\d{{1,2}})\s+(?P<month>{_MONTH_PATTERN})(?:\s+(?P<year>\d{{4}}))?"
+    rf"|(?P<numeric_day>\d{{1,2}})[./](?P<numeric_month>\d{{1,2}})[./](?P<numeric_year>\d{{4}})"
+    rf")\b",
+    re.IGNORECASE,
+)
+_TIME_RANGE_PATTERN = re.compile(
+    r"(?<!\d)(\d{1,2}:\d{2})\s*(?:->|→|-|–|—|−|━|─|до)\s*(\d{1,2}:\d{2})(?!\d)",
+    re.IGNORECASE,
+)
+_OUTAGE_MARKERS = (
+    "❌",
+    "❎",
+    "✖",
+    "⛔",
+    "без світла",
+    "без електроенергії",
+    "немає електроенергії",
+    "відсутнє електропостачання",
+    "відключ",
+    "знеструм",
+)
+_POWER_MARKERS = ("💡", "✅", "☀", "зі світлом", "є світло", "світло є")
+
 
 async def get_access_token(hass, key_path):
     sa = await async_read_json(key_path)
@@ -47,30 +73,18 @@ async def get_access_token(hass, key_path):
 
 
 def extract_date(text: str) -> str | None:
-    month_pattern = "|".join(UA_MONTHS.keys())
-    pattern = (
-        rf"(\d{{1,2}})\s+({month_pattern})(?:\s+(\d{{4}}))?|"
-        rf"(\d{{1,2}})[.](\d{{1,2}})[.](\d{{4}})"
-    )
-
-    match = re.search(pattern, text.lower())
-
+    match = _DATE_PATTERN.search(text)
     if not match:
         return None
 
-    if match.group(1):
-        day = int(match.group(1))
-        month_name = match.group(2)
-        year = int(match.group(3)) if match.group(3) else datetime.now().year
-
-        if month_name not in UA_MONTHS:
-            return None
-
-        month = UA_MONTHS[month_name]
+    if match.group("day"):
+        day = int(match.group("day"))
+        month = UA_MONTHS[match.group("month").lower()]
+        year = int(match.group("year")) if match.group("year") else datetime.now().year
     else:
-        day = int(match.group(4))
-        month = int(match.group(5))
-        year = int(match.group(6))
+        day = int(match.group("numeric_day"))
+        month = int(match.group("numeric_month"))
+        year = int(match.group("numeric_year"))
 
     try:
         return datetime(year, month, day).strftime("%Y-%m-%d")
@@ -82,6 +96,34 @@ def extract_hours(text: str) -> list[str]:
     """Extract outage intervals as HH:MM-HH:MM strings."""
     pattern = r"\D*(\d{1,2}:\d{2})\D*(\d{1,2}:\d{2})"
     return [f"{start}-{end}" for start, end in re.findall(pattern, text)]
+
+
+def _outage_status(line: str) -> bool | None:
+    """Return whether a schedule line marks an outage, power, or unknown status."""
+    normalized = line.casefold()
+    if any(marker in normalized for marker in _OUTAGE_MARKERS):
+        return True
+    if any(marker in normalized for marker in _POWER_MARKERS):
+        return False
+    return None
+
+
+def _extract_text_outage_hours(section: str) -> list[str]:
+    intervals: list[tuple[str, bool | None]] = []
+    for line in section.splitlines():
+        status = _outage_status(line)
+        intervals.extend(
+            (f"{start}-{end}", status)
+            for start, end in _TIME_RANGE_PATTERN.findall(line)
+        )
+
+    if not intervals:
+        return []
+
+    if all(status is not None for _, status in intervals):
+        return [interval for interval, status in intervals if status]
+
+    return [interval for interval, status in intervals if status is True]
 
 
 async def parse_schedule_from_image(hass: HomeAssistant, path: str) -> dict | None:
@@ -138,8 +180,7 @@ async def parse_schedule_from_image(hass: HomeAssistant, path: str) -> dict | No
 
 
 async def parse_schedule_from_text(text: str) -> list[dict] | None:
-    date_pattern = r"\b\d{2}\.\d{2}\.\d{4}\b"
-    matches = list(re.finditer(date_pattern, text))
+    matches = list(_DATE_PATTERN.finditer(text))
 
     if not matches:
         _LOGGER.warning("No dates found in schedule text")
@@ -157,10 +198,7 @@ async def parse_schedule_from_text(text: str) -> list[dict] | None:
         if not date:
             continue
 
-        outage_lines = [
-            line for line in section.splitlines() if "світла немає" in line.lower()
-        ]
-        hours = extract_hours("\n".join(outage_lines))
+        hours = _extract_text_outage_hours(section)
 
         results.append({"day": date, "hours": hours})
 
